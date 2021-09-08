@@ -39,7 +39,7 @@ name, color, entropy, difficulty, gemsPerMine, multiplier, crafter, manager, pen
     gem_contract.functions.gems(target_gem).call()
 nonce = gem_contract.functions.nonce(your_address).call()
 
-chain_id = 1  # eth
+chain_id = 250  # eth
 
 if NOTIFY_AUTH_TOKEN != '':
     body = {
