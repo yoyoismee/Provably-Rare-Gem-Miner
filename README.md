@@ -30,3 +30,14 @@ Ps. too lazy to write docs. but it's 50 LoCs have fun.
 why stick the miner ? welp.. this is part of the [stick the BUIDLer](https://opensea.io/collection/stick-the-buidler) series. 
 
 TL;DR - I'm working on a series of opensource NFT related project just for fun. 
+
+
+### (more detail) how to use 'auto_mine.py'
+
+- benefits: manual version (stick_the_miner.py) requires you to update the 'diff' parameter every time someone minted the nft of the target gem
+- steps:
+- 1. update requirements ``` pip install -r requirement.txt ```
+- 2. create an account at (https://infura.io/), select your chain (e.g. Ethereum), create a project and obtain your project ID
+- 3. create a .env file in the same format as .env-example, inputing your information from (2.), your wallet address and gem ID
+- 4. ``` python3 run auto_mine.py``` 
+- Note: although you dont have to manually adjust 'diff' parameter everytime, you still need to restart the process everytime someone minted target gem's nft still
