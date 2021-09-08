@@ -5,7 +5,7 @@
 # only work with eth for now
 
 from web3 import Web3
-from classy_stick import StickTheMiner
+from classy_stick import StickTheMiner, BasicDiffCallback
 import os
 from dotenv import load_dotenv
 import requests
@@ -46,10 +46,10 @@ chain_id = 1  # eth
 if NOTIFY_AUTH_TOKEN != '':
     body = {
         'message': 'Starting gem mining...'
-        + '\nkind: ' + str(target_gem)
-        + '\nwallet: ' + your_address
-        + '\nnonce: ' + str(nonce)
-        + '\ndifficulty: ' + str(difficulty)
+                   + '\nkind: ' + str(target_gem)
+                   + '\nwallet: ' + your_address
+                   + '\nnonce: ' + str(nonce)
+                   + '\ndifficulty: ' + str(difficulty)
     }
 
     res = requests.post(notify_url, data=body, headers=notify_headers)
@@ -57,17 +57,18 @@ if NOTIFY_AUTH_TOKEN != '':
 
 # Start mining
 stick = StickTheMiner(chain_id, entropy, gem_addr,
-                      your_address, target_gem, nonce, difficulty)
+                      your_address, target_gem, nonce, difficulty,
+                      diff_callback=BasicDiffCallback(gem_contract, target_gem))
 salt = stick.run()
 
 if NOTIFY_AUTH_TOKEN != '':
     body = {
         'message': 'Gem found'
-        + '\nkind: ' + str(target_gem)
-        + '\nwallet: ' + your_address
-        + '\nnonce: ' + str(nonce)
-        + '\ndifficulty: ' + str(difficulty)
-        + '\nsalt: ' + str(salt)
+                   + '\nkind: ' + str(target_gem)
+                   + '\nwallet: ' + your_address
+                   + '\nnonce: ' + str(nonce)
+                   + '\ndifficulty: ' + str(difficulty)
+                   + '\nsalt: ' + str(salt)
     }
     res = requests.post(notify_url, data=body, headers=notify_headers)
     print("End result notified:", res.text)
