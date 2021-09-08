@@ -16,6 +16,7 @@ WALLET_ADDRESS = os.getenv('WALLET_ADDRESS', 'DEFAULT_WALLET')
 # change influra api key here or in .env
 INFLURA_API_KEY = os.getenv('INFLURA_API_KEY', 'DEFAULT_INFLURA')
 TARGET_GEM = int(os.getenv('TARGET_GEM', 1))  # change gem here or in .env
+LINE_TOKEN = os.getenv('LINE_TOKEN', None)
 
 # config here
 w3 = Web3(Web3.HTTPProvider(f'https://mainnet.infura.io/v3/{INFLURA_API_KEY}'))
@@ -38,11 +39,11 @@ nonce = gem_contract.functions.nonce(your_address).call()
 chain_id = 1  # eth
 
 stick = StickTheMiner(chain_id, entropy, gem_addr,
-                      your_address, target_gem, nonce, difficulty)
+                      your_address, target_gem, nonce, difficulty, LINE_TOKEN)
 salt = stick.run()
 
 """
-private_key = "" # use at your own risk
+private_key = os.getenv('PRIVATE_KEY', 'PRIVATE KEY')
 gas = None # pick a number
 transaction = gem_contract.functions.mine(target_gem, salt).buildTransaction()
 transaction.update({'gas': gas})

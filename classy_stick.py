@@ -7,12 +7,17 @@ from eth_abi.packed import encode_abi_packed
 import random
 import time
 from datetime import datetime, timedelta
+from line_notify import LineNotify
 
 
 class StickTheMiner:
-    def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce, diff):
+    def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce, diff, line_token=None):
         self.task = [chain_id, entropy, gemAddr, senderAddr, kind, nonce]
         self.target = 2 ** 256 / diff
+        if line_token is None:
+            self.line_notify = None
+        else:
+            self.line_notify = LineNotify(line_token)
 
     @staticmethod
     def pack_mine(chain_id, entropy, gemAddr, senderAddr, kind, nonce, salt) -> bytes:
@@ -41,9 +46,12 @@ class StickTheMiner:
             hx, ix = self.mine(self.pack_mine(*self.task, salt))
 
             if ix < self.target:
-                print("done! here's the salt - ", salt)
-                print(f'Elapsed: {str(timedelta(seconds=(time.time() - st)))}',
-                      'found on:', datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                template = "done! here's the salt - " + str(salt) + "\n"
+                template += f'Elapsed: {str(timedelta(seconds=(time.time() - st)))}\n' + f'found on: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}'
+
+                print(template)
+                if self.line_notify is not None:
+                    self.line_notify.send(template)
                 return salt
 
             if i % 5000 == 0:
