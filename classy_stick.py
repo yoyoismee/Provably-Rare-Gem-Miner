@@ -6,6 +6,7 @@ from Crypto.Hash import keccak
 from eth_abi.packed import encode_abi_packed
 import random
 import time
+from datetime import datetime, timedelta
 
 
 class StickTheMiner:
@@ -27,7 +28,8 @@ class StickTheMiner:
 
     @staticmethod
     def get_salt() -> int:
-        return random.randint(1, 2 ** 123)  # can probably go to 256 but 123 probably enough
+        # can probably go to 256 but 123 probably enough
+        return random.randint(1, 2 ** 123)
 
     def run(self):
         i = 0
@@ -40,6 +42,8 @@ class StickTheMiner:
 
             if ix < self.target:
                 print("done! here's the salt - ", salt)
+                print(f'Elapsed: {str(timedelta(seconds=(time.time() - st)))}',
+                      'found on:', datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 return salt
 
             if i % 5000 == 0:
