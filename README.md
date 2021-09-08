@@ -20,6 +20,10 @@ pip install -r requirement.txt
 python3 stick_the_miner.py
 ```
 
+or new one `auto_mine.py` for less input. but you'll need [infura account](https://infura.io/)
+
+
+
 Ps. too lazy to write docs. but it's 50 LoCs have fun.  
 
 ---
