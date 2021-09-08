@@ -8,9 +8,9 @@ from web3 import Web3
 from classy_stick import StickTheMiner
 
 # config here
-w3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/[your infura project - go go RTFM]'))
-your_address = "0x6647a7858a0B3846AbD5511e7b797Fc0a0c63a4b" # my address don't use it.
-target_gem = 1 # gem type
+w3 = Web3(Web3.HTTPProvider("https://mainnet.infura.io/v3/[your infura project - go go RTFM]"))
+your_address = "0x6647a7858a0B3846AbD5511e7b797Fc0a0c63a4b"  # my address don't use it.
+target_gem = 1  # gem type
 
 ### glhf - no need to change
 gem_addr = "0xC67DED0eC78b849e17771b2E8a7e303B4dAd6dD4"
@@ -25,4 +25,13 @@ nonce = gem_contract.functions.nonce(your_address).call()
 chain_id = 1  # eth
 
 stick = StickTheMiner(chain_id, entropy, gem_addr, your_address, target_gem, nonce, difficulty)
-stick.run()
+salt = stick.run()
+
+"""
+private_key = "" # use at your own risk
+gas = None # pick a number
+transaction = gem_contract.functions.mine(target_gem, salt).buildTransaction()
+transaction.update({'gas': gas})
+transaction.update({'nonce': w3.eth.get_transaction_count('Your_Wallet_Address')})
+signed_tx = w3.eth.account.sign_transaction(transaction, private_key)
+"""
