@@ -5,9 +5,10 @@
 # only work with eth for now
 
 from web3 import Web3
-from classy_stick import StickTheMiner
+from classy_stick import StickTheMiner, BasicDiffCallback
 import os
 from dotenv import load_dotenv
+import requests
 
 load_dotenv()
 
@@ -22,6 +23,11 @@ LINE_TOKEN = os.getenv('LINE_TOKEN', None)
 w3 = Web3(Web3.HTTPProvider(f'https://mainnet.infura.io/v3/{INFLURA_API_KEY}'))
 your_address = WALLET_ADDRESS  # my address don't use it.
 target_gem = TARGET_GEM  # gem type
+
+# Line notification
+NOTIFY_AUTH_TOKEN = os.getenv('NOTIFY_AUTH_TOKEN', '')
+notify_url = 'https://notify-api.line.me/api/notify'
+notify_headers = {'Authorization': 'Bearer ' + NOTIFY_AUTH_TOKEN}
 
 print('Your wallet', WALLET_ADDRESS)
 print('Gem', TARGET_GEM)
@@ -38,9 +44,35 @@ nonce = gem_contract.functions.nonce(your_address).call()
 
 chain_id = 1  # eth
 
+if NOTIFY_AUTH_TOKEN != '':
+    body = {
+        'message': 'Starting gem mining...'
+                   + '\nkind: ' + str(target_gem)
+                   + '\nwallet: ' + your_address
+                   + '\nnonce: ' + str(nonce)
+                   + '\ndifficulty: ' + str(difficulty)
+    }
+
+    res = requests.post(notify_url, data=body, headers=notify_headers)
+    print("Start result notified:", res.text)
+
+# Start mining
 stick = StickTheMiner(chain_id, entropy, gem_addr,
-                      your_address, target_gem, nonce, difficulty, LINE_TOKEN)
+                      your_address, target_gem, nonce, difficulty,
+                      diff_callback=BasicDiffCallback(gem_contract, target_gem))
 salt = stick.run()
+
+if NOTIFY_AUTH_TOKEN != '':
+    body = {
+        'message': 'Gem found'
+                   + '\nkind: ' + str(target_gem)
+                   + '\nwallet: ' + your_address
+                   + '\nnonce: ' + str(nonce)
+                   + '\ndifficulty: ' + str(difficulty)
+                   + '\nsalt: ' + str(salt)
+    }
+    res = requests.post(notify_url, data=body, headers=notify_headers)
+    print("End result notified:", res.text)
 
 """
 private_key = os.getenv('PRIVATE_KEY', 'PRIVATE KEY')

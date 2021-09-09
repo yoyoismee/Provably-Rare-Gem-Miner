@@ -10,7 +10,18 @@ from datetime import datetime, timedelta
 from line_notify import LineNotify
 
 
+class BasicDiffCallback:
+    def __init__(self, contract, gem):
+        self.contract = contract
+        self.gem = gem
+
+    def get_diff(self):
+        _, _, _, difficulty, _, _, _, _, _ = self.contract.functions.gems(self.gem).call()
+        return difficulty
+
+
 class StickTheMiner:
+<<<<<<< HEAD
     def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce, diff, line_token=None):
         self.task = [chain_id, entropy, gemAddr, senderAddr, kind, nonce]
         self.target = 2 ** 256 / diff
@@ -18,6 +29,13 @@ class StickTheMiner:
             self.line_notify = None
         else:
             self.line_notify = LineNotify(line_token)
+=======
+    def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce, diff, diff_callback=None):
+        self.task = [chain_id, entropy, gemAddr, senderAddr, kind, nonce]
+        self.target = 2 ** 256 / diff
+        self.diff_callback = diff_callback
+        self.diff = diff
+>>>>>>> 964fa9727e7f2d188cd6a3422d92edd0bb5362f9
 
     @staticmethod
     def pack_mine(chain_id, entropy, gemAddr, senderAddr, kind, nonce, salt) -> bytes:
@@ -55,4 +73,7 @@ class StickTheMiner:
                 return salt
 
             if i % 5000 == 0:
-                print(f'iter {i}, {i / (time.time() - st)} avg iter per sec')
+                if self.diff_callback is not None:
+                    self.diff = self.diff_callback.get_diff()
+                    self.target = 2 ** 256 / self.diff
+                print(f'iter {i}, {i / (time.time() - st)} avg iter per sec, current diff {self.diff}')
