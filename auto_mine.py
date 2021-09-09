@@ -74,7 +74,7 @@ if NOTIFY_AUTH_TOKEN != '':
     print("End result notified:", res.text)
 
 """
-private_key = "" # use at your own risk
+private_key = os.getenv('PRIVATE_KEY', 'PRIVATE KEY')
 gas = None # pick a number
 transaction = gem_contract.functions.mine(target_gem, salt).buildTransaction()
 transaction.update({'gas': gas})
