@@ -21,11 +21,12 @@ class BasicDiffCallback:
 
 
 class StickTheMiner:
-    def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce, diff, diff_callback=None):
+    def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce, diff, diff_callback=None, line_notify=None):
         self.task = [chain_id, entropy, gemAddr, senderAddr, kind, nonce]
         self.target = 2 ** 256 / diff
         self.diff_callback = diff_callback
         self.diff = diff
+        self.line_notify = line_notify
 
     @staticmethod
     def pack_mine(chain_id, entropy, gemAddr, senderAddr, kind, nonce, salt) -> bytes:
