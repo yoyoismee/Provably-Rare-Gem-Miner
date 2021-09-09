@@ -45,7 +45,7 @@ chain_id = 1  # eth
 
 if NOTIFY_AUTH_TOKEN != '':
     body = {
-        'message': 'Starting gem mining...'
+        'message': '🕒 Starting gem mining...'
                    + '\nkind: ' + str(target_gem)
                    + '\nwallet: ' + your_address
                    + '\nnonce: ' + str(nonce)
@@ -63,7 +63,7 @@ salt = stick.run()
 
 if NOTIFY_AUTH_TOKEN != '':
     body = {
-        'message': 'Gem found'
+        'message': '🎉🎉🎉 Gem found'
                    + '\nkind: ' + str(target_gem)
                    + '\nwallet: ' + your_address
                    + '\nnonce: ' + str(nonce)
