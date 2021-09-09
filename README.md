@@ -48,7 +48,7 @@ TL;DR - I'm working on a series of opensource NFT related project just for fun.
 
 - benefits: manual version (stick_the_miner.py) requires you to update the 'diff' parameter every time someone minted the nft of the target gem, and 'nounce' if you successfully minted one. This version automates that so you just have to rerun to update.
 - steps:
-- 1. update requirements ``` pip install -r requirement.txt ```
+- 1. update requirements ``` pip install -r requirements.txt ```
 - 2. create an account at (https://infura.io/), select your chain (e.g. Ethereum), create a project and obtain your project ID
 - 3. create a .env file in the same format as .env-example, inputing your information from (2.), your wallet address and gem ID
 - 4. ``` python3 auto_mine.py``` 
