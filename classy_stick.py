@@ -27,6 +27,7 @@ class StickTheMiner:
         self.diff_callback = diff_callback
         self.diff = diff
         self.line_notify = line_notify
+        self.last_check = 0
 
     @staticmethod
     def pack_mine(chain_id, entropy, gemAddr, senderAddr, kind, nonce, salt) -> bytes:
@@ -65,6 +66,8 @@ class StickTheMiner:
 
             if i % 5000 == 0:
                 if self.diff_callback is not None:
-                    self.diff = self.diff_callback.get_diff()
-                    self.target = 2 ** 256 / self.diff
+                    if time.time() - self.last_check > 120:
+                        self.diff = self.diff_callback.get_diff()
+                        self.target = 2 ** 256 / self.diff
+                        self.last_check = time.time()
                 print(f'iter {i}, {i / (time.time() - st)} avg iter per sec, current diff {self.diff}')
