@@ -51,7 +51,7 @@ TL;DR - I'm working on a series of opensource NFT related project just for fun.
 - 1. update requirements ``` pip install -r requirement.txt ```
 - 2. create an account at (https://infura.io/), select your chain (e.g. Ethereum), create a project and obtain your project ID
 - 3. create a .env file in the same format as .env-example, inputing your information from (2.), your wallet address and gem ID
-- 4. ``` python3 run auto_mine.py``` 
+- 4. ``` python3 auto_mine.py``` 
 - Note: although you dont have to manually adjust 'diff' parameter everytime, you still need to restart the process everytime someone minted target gem's nft still
 
 
