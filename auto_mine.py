@@ -17,7 +17,6 @@ WALLET_ADDRESS = os.getenv('WALLET_ADDRESS', 'DEFAULT_WALLET')
 # change influra api key here or in .env
 INFLURA_API_KEY = os.getenv('INFLURA_API_KEY', 'DEFAULT_INFLURA')
 TARGET_GEM = int(os.getenv('TARGET_GEM', 1))  # change gem here or in .env
-LINE_TOKEN = os.getenv('LINE_TOKEN', None)
 
 # config here
 w3 = Web3(Web3.HTTPProvider(f'https://mainnet.infura.io/v3/{INFLURA_API_KEY}'))
