@@ -70,4 +70,6 @@ class StickTheMiner:
                         self.diff = self.diff_callback.get_diff()
                         self.target = 2 ** 256 / self.diff
                         self.last_check = time.time()
-                print(f'iter {i}, {i / (time.time() - st)} avg iter per sec, current diff {self.diff}')
+                avg_it_sec = i / (time.time() - st)
+                print(
+                    f'iter {i}, {avg_it_sec} avg iter per sec, current diff {self.diff}, est mining time - {self.diff / avg_it_sec / 60 / 60} hrs')
