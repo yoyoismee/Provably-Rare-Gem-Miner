@@ -5,7 +5,7 @@
 # only work with eth for now
 
 from web3 import Web3
-from classy_stick import StickTheMiner, BasicDiffCallback
+from classy_stick import StickTheMiner, BasicDiffCallback, BasicNonceCallback
 import os
 from dotenv import load_dotenv
 import requests
@@ -56,7 +56,8 @@ if NOTIFY_AUTH_TOKEN != '':
 # Start mining
 stick = StickTheMiner(chain_id, entropy, gem_addr,
                       your_address, target_gem, nonce, difficulty,
-                      diff_callback=BasicDiffCallback(gem_contract, target_gem))
+                      diff_callback=BasicDiffCallback(gem_contract, target_gem),
+                      nonce_callback=BasicNonceCallback(contract=gem_contract, address=your_address))
 salt = stick.run()
 
 if NOTIFY_AUTH_TOKEN != '':

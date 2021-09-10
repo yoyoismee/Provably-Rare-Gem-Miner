@@ -20,11 +20,24 @@ class BasicDiffCallback:
         return difficulty
 
 
+class BasicNonceCallback:
+    def __init__(self, contract, address):
+        self.contract = contract
+        self.address = address
+
+    def get_nonce(self):
+        nonce = self.contract.functions.nonce(self.address).call()
+        print("nonce - ", nonce)
+        return nonce
+
+
 class StickTheMiner:
-    def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce, diff, diff_callback=None, line_notify=None):
+    def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce,
+                 diff, diff_callback=None, nonce_callback=None, line_notify=None):
         self.task = [chain_id, entropy, gemAddr, senderAddr, kind, nonce]
         self.target = 2 ** 256 / diff
         self.diff_callback = diff_callback
+        self.nonce_callback = nonce_callback
         self.diff = diff
         self.line_notify = line_notify
         self.last_check = 0
@@ -49,6 +62,8 @@ class StickTheMiner:
     def run(self):
         i = 0
         st = time.time()
+        if self.nonce_callback is not None:
+            self.task[5] = self.nonce_callback.get_nonce()
         while True:
             i += 1
             salt = self.get_salt()
@@ -65,11 +80,13 @@ class StickTheMiner:
                 return salt
 
             if i % 5000 == 0:
-                if self.diff_callback is not None:
-                    if time.time() - self.last_check > 120:
+                if time.time() - self.last_check > 60:
+                    if self.diff_callback is not None:
                         self.diff = self.diff_callback.get_diff()
                         self.target = 2 ** 256 / self.diff
                         self.last_check = time.time()
+                    if self.nonce_callback is not None:
+                        self.task[5] = self.nonce_callback.get_nonce()
                 avg_it_sec = i / (time.time() - st)
                 print(
                     f'iter {i}, {avg_it_sec} avg iter per sec, current diff {self.diff}, est mining time - {self.diff / avg_it_sec / 60 / 60} hrs')
