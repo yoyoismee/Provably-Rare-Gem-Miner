@@ -4,3 +4,4 @@ web3
 python-dotenv
 line_notify
 pyinstaller
+colorlog
