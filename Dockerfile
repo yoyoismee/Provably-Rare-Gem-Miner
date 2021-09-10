@@ -6,7 +6,7 @@ COPY requirement.txt ./
 RUN pip install --no-cache-dir -r requirement.txt
 
 ENV WALLET_ADDRESS 0x
-ENV INFLURA_API_KEY ''
+ENV INFURA_API_KEY ''
 ENV TARGET_GEM 1
 ENV NOTIFY_AUTH_TOKEN ''
 

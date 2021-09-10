@@ -15,11 +15,11 @@ load_dotenv()
 # change wallet here or in .env
 WALLET_ADDRESS = os.getenv('WALLET_ADDRESS', 'DEFAULT_WALLET')
 # change influra api key here or in .env
-INFLURA_API_KEY = os.getenv('INFLURA_API_KEY', 'DEFAULT_INFLURA')
+INFURA_API_KEY = os.getenv('INFURA_API_KEY', 'DEFAULT_INFLURA')
 TARGET_GEM = int(os.getenv('TARGET_GEM', 1))  # change gem here or in .env
 
 # config here
-w3 = Web3(Web3.HTTPProvider(f'https://mainnet.infura.io/v3/{INFLURA_API_KEY}'))
+w3 = Web3(Web3.HTTPProvider(f'https://mainnet.infura.io/v3/{INFURA_API_KEY}'))
 your_address = WALLET_ADDRESS  # my address don't use it.
 target_gem = TARGET_GEM  # gem type
 
