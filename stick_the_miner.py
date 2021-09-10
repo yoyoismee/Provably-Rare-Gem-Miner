@@ -7,6 +7,8 @@ from eth_abi.packed import encode_abi_packed
 import random
 import time
 import logging, colorlog
+import psutil
+import os
 
 SALTCOLORLEVEL = 1
 RESULTCOLORLEVEL = 2
@@ -58,7 +60,8 @@ def get_salt() -> int:
     return random.randint(1, 2 ** 123)  # can probably go to 256 but 123 probably enough
 
 logger = setup_logger()
-
+core = psutil.Process(os.getpid())
+core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
 i = 0
 st = time.time()
 while True:
@@ -71,6 +74,6 @@ while True:
         logger.log(RESULTCOLORLEVEL, "done! here's the salt")
         logger.log(SALTCOLORLEVEL,str(salt))
         break
-    
+
     if i % 5000 == 0:
         print(f'iter {i}, {i / (time.time() - st)} avg iter per sec')
