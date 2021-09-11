@@ -4,6 +4,7 @@
 
 from Crypto.Hash import keccak
 from eth_abi.packed import encode_abi_packed
+from sys import platform
 import random
 import time
 import logging, colorlog
@@ -59,9 +60,12 @@ def mine(packed) -> (str, int):
 def get_salt() -> int:
     return random.randint(1, 2 ** 123)  # can probably go to 256 but 123 probably enough
 
-logger = setup_logger()
 core = psutil.Process(os.getpid())
-core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+if platform == "win32":
+    core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+elif platform == "darwin":
+    core.nice(10)
+logger = setup_logger()
 i = 0
 st = time.time()
 while True:
