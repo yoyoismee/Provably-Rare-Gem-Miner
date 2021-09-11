@@ -84,6 +84,6 @@ while True:
         'nonce': w3.eth.get_transaction_count(your_address),
     })
     signed_tx = w3.eth.account.sign_transaction(transaction, private_key)
-    ticket = w3.eth.send_raw_transaction(signed_tx)
+    ticket = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
     print(w3.eth.wait_for_transaction_receipt(ticket))
     print("done")
