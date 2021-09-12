@@ -58,7 +58,7 @@ def mine(packed) -> (str, int):
     return hx, int(hx, base=16)
 
 def get_salt() -> int:
-    return random.randint(1, 2 ** 123)  # can probably go to 256 but 123 probably enough
+    return random.randint(1, 2 ** 256)  # can probably go to 256 but 123 probably enough
 
 core = psutil.Process(os.getpid())
 if platform == "win32":

@@ -57,7 +57,7 @@ class StickTheMiner:
     @staticmethod
     def get_salt() -> int:
         # can probably go to 256 but 123 probably enough
-        return random.randint(1, 2 ** 123)
+        return random.randint(1, 2 ** 256)
 
     def run(self):
         i = 0
