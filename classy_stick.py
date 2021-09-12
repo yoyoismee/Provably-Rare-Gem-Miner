@@ -7,8 +7,6 @@ from eth_abi.packed import encode_abi_packed
 import random
 import time
 from datetime import datetime, timedelta
-from line_notify import LineNotify
-
 
 class BasicDiffCallback:
     def __init__(self, contract, gem):
@@ -19,7 +17,6 @@ class BasicDiffCallback:
         _, _, _, difficulty, _, _, _, _, _ = self.contract.functions.gems(self.gem).call()
         return difficulty
 
-
 class BasicNonceCallback:
     def __init__(self, contract, address):
         self.contract = contract
@@ -27,9 +24,8 @@ class BasicNonceCallback:
 
     def get_nonce(self):
         nonce = self.contract.functions.nonce(self.address).call()
-        print("nonce - ", nonce)
+        # print("nonce - ", nonce)
         return nonce
-
 
 class StickTheMiner:
     def __init__(self, chain_id, entropy, gemAddr, senderAddr, kind, nonce,
@@ -41,7 +37,7 @@ class StickTheMiner:
         self.diff = diff
         self.line_notify = line_notify
         self.last_check = 0
-
+        
     @staticmethod
     def pack_mine(chain_id, entropy, gemAddr, senderAddr, kind, nonce, salt) -> bytes:
         return encode_abi_packed(['uint256', 'bytes32', 'address', 'address', 'uint', 'uint', 'uint'],
@@ -58,13 +54,13 @@ class StickTheMiner:
     def get_salt() -> int:
         # can probably go to 256 but 123 probably enough
         return random.randint(1, 2 ** 256)
-
-    def run(self):
+    
+    def run(self, processNumber, saltQueue, itrQueue):
         i = 0
         st = time.time()
         if self.nonce_callback is not None:
             self.task[5] = self.nonce_callback.get_nonce()
-        while True:
+        while saltQueue.empty() is True:
             i += 1
             salt = self.get_salt()
             # salt = i
@@ -77,7 +73,7 @@ class StickTheMiner:
                 print(template)
                 if self.line_notify is not None:
                     self.line_notify.send(template)
-                return salt
+                saltQueue.put(salt)
 
             if i % 5000 == 0:
                 if time.time() - self.last_check > 60:
@@ -87,6 +83,10 @@ class StickTheMiner:
                         self.last_check = time.time()
                     if self.nonce_callback is not None:
                         self.task[5] = self.nonce_callback.get_nonce()
-                avg_it_sec = i / (time.time() - st)
+                itr = itrQueue.get()
+                totalItr = itr + i
+                itrQueue.put(totalItr)
+                i = 0
+                avg_it_sec = totalItr / (time.time() - st)
                 print(
-                    f'iter {i}, {avg_it_sec} avg iter per sec, current diff {self.diff}, est mining time - {self.diff / avg_it_sec / 60 / 60} hrs')
+                    f'{processNumber} iter {totalItr}, {avg_it_sec} avg iter per sec, current diff {self.diff}, est mining time - {self.diff / avg_it_sec / 60 / 60} hrs, time spent mining - {(time.time() - st) / 60} mins')
