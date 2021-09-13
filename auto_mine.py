@@ -13,14 +13,13 @@ import requests
 load_dotenv()
 
 # change wallet here or in .env
-WALLET_ADDRESS = os.getenv('WALLET_ADDRESS', 'DEFAULT_WALLET')
+your_address = os.getenv('WALLET_ADDRESS', 'DEFAULT_WALLET')
 # change influra api key here or in .env
 INFURA_API_KEY = os.getenv('INFURA_API_KEY', 'DEFAULT_INFLURA')
 TARGET_GEM = int(os.getenv('TARGET_GEM', 1))  # change gem here or in .env
 
 # config here
 w3 = Web3(Web3.HTTPProvider(f'https://mainnet.infura.io/v3/{INFURA_API_KEY}'))
-your_address = WALLET_ADDRESS  # my address don't use it.
 target_gem = TARGET_GEM  # gem type
 
 # Line notification
@@ -79,6 +78,6 @@ private_key = os.getenv('PRIVATE_KEY', 'PRIVATE KEY')
 gas = None # pick a number
 transaction = gem_contract.functions.mine(target_gem, salt).buildTransaction()
 transaction.update({'gas': gas})
-transaction.update({'nonce': w3.eth.get_transaction_count('Your_Wallet_Address')})
+transaction.update({'nonce': w3.eth.get_transaction_count(your_address)})
 signed_tx = w3.eth.account.sign_transaction(transaction, private_key)
 """
