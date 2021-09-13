@@ -16,9 +16,10 @@ TARGET_GEM = int(os.getenv('TARGET_GEM', 1))  # change gem here or in .env
 
 w3 = Web3(Web3.HTTPProvider('https://rpc.ftm.tools'))
 target_gem = TARGET_GEM  # gem type
-your_address = "0x6647a7858a0B3846AbD5511e7b797Fc0a0c63a4b"
+WALLET_ADDRESS = str(os.getenv('WALLET_ADDRESS_ELUP', ''))
+PRIVATE_KEY = str(os.getenv('PRIVATE_KEY_ELUP', ''))
 # your target diff level, will submit result to the pool if salt reach target quality. note that submit salt will cost gas.
-difficulty = 5000000
+difficulty = 500000
 
 pool_addr = "0x7558cF0c0Dfc21b30D5012586492aEA49fE1c27d"  # pool address
 pool_abi = '[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"uint256","name":"kind","type":"uint256"},{"internalType":"address","name":"wrapAddress","type":"address"},{"internalType":"string","name":"HPName","type":"string"},{"internalType":"string","name":"HPSymbol","type":"string"},{"internalType":"uint256","name":"bonus","type":"uint256"}],"name":"addGem","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"kind","type":"uint256"}],"name":"gems","outputs":[{"internalType":"string","name":"","type":"string"},{"internalType":"string","name":"","type":"string"},{"internalType":"bytes32","name":"","type":"bytes32"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"gemsMap","outputs":[{"internalType":"bool","name":"exist","type":"bool"},{"internalType":"uint256","name":"kind","type":"uint256"},{"internalType":"address","name":"wrapAddress","type":"address"},{"internalType":"contract HPToken","name":"hptoken","type":"address"},{"internalType":"uint256","name":"bonus","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"kind","type":"uint256"},{"internalType":"uint256","name":"salt","type":"uint256"}],"name":"mine","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"notInUse","type":"address"}],"name":"nonce","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155BatchReceived","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"kind","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]'
@@ -41,11 +42,11 @@ name, color, entropy, _, gemsPerMine, multiplier, crafter, manager, pendingManag
     gem_contract.functions.gems(target_gem).call()
 nonce = gem_contract.functions.nonce(pool_addr).call()
 
-chain_id = 250  # eth
+chain_id = 250  # ftm
 
 if NOTIFY_AUTH_TOKEN != '':
     body = {
-        'message': 'Starting gem mining...'
+        'message': '🌊Gem mining in a Pool...'
                    + '\nkind: ' + str(target_gem)
                    + '\nwallet: ' + pool_addr
                    + '\nnonce: ' + str(nonce)
@@ -54,7 +55,7 @@ if NOTIFY_AUTH_TOKEN != '':
 
     res = requests.post(notify_url, data=body, headers=notify_headers)
     print("Start result notified:", res.text)
-
+i = 0
 while True:
     # Start mining
     stick = StickTheMiner(chain_id, entropy, gem_addr,
@@ -75,15 +76,17 @@ while True:
         print("End result notified:", res.text)
 
     print("submiting tx")
-    private_key = ""  # use at your own risk
+    # private_key = ""  # use at your own risk
     gas = w3.eth.gasPrice  # pick a number
     transaction = pool_contract.functions.mine(target_gem, salt).buildTransaction({
-        'from': your_address,
+        'from': WALLET_ADDRESS,
         'gasPrice': gas,
         "gas": 300000,
-        'nonce': w3.eth.get_transaction_count(your_address),
+        'nonce': w3.eth.get_transaction_count(WALLET_ADDRESS),
     })
-    signed_tx = w3.eth.account.sign_transaction(transaction, private_key)
+    signed_tx = w3.eth.account.sign_transaction(transaction, PRIVATE_KEY)
     ticket = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
     print(w3.eth.wait_for_transaction_receipt(ticket))
-    print("done")
+    i += 1
+    print("done - ", i, " times")
+    

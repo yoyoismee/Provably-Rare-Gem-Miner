@@ -7,7 +7,7 @@
 import multiprocessing
 import psutil
 from web3 import Web3
-import classy_stick
+import not_classy_stick
 import os
 from dotenv import load_dotenv
 import requests
@@ -54,9 +54,9 @@ coreNumber = 14
 # for j in range(len(gem_contract_dict)):
 #     print(gem_contract_dict["gem_contract_{num}".format(num=j)])
 def mine(coreNumber,saltQueue,itrQueue):
-    diff_result = classy_stick.BasicDiffCallback(gem_contract, target_gem)
-    nonce_result = classy_stick.BasicNonceCallback(contract=gem_contract, address=your_address)
-    stick = classy_stick.StickTheMiner(chain_id, entropy, gem_addr,
+    diff_result = not_classy_stick.BasicDiffCallback(gem_contract, target_gem)
+    nonce_result = not_classy_stick.BasicNonceCallback(contract=gem_contract, address=your_address)
+    stick = not_classy_stick.StickTheMiner(chain_id, entropy, gem_addr,
                     your_address, target_gem, nonce, difficulty,
                     diff_callback=diff_result,
                     nonce_callback=nonce_result)
@@ -78,8 +78,8 @@ if __name__ == '__main__':
         res = requests.post(notify_url, data=body, headers=notify_headers)
         print("Start result notified:", res.text)
 
-    diff_value = classy_stick.BasicDiffCallback(gem_contract, target_gem).get_diff()
-    nonce_value = classy_stick.BasicNonceCallback(gem_contract, your_address).get_nonce()
+    diff_value = not_classy_stick.BasicDiffCallback(gem_contract, target_gem).get_diff()
+    nonce_value = not_classy_stick.BasicNonceCallback(gem_contract, your_address).get_nonce()
     logger.log(loggerOBJ.get_diff(), str(diff_value))
     logger.log(loggerOBJ.get_nonce(), str(nonce_value))
    
