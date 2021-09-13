@@ -4,11 +4,15 @@
 # use at your own risk
 # only work with eth for now
 
+import multiprocessing
 from web3 import Web3
-from classy_stick import StickTheMiner, BasicDiffCallback, BasicNonceCallback
+import not_classy_stick
 import os
 from dotenv import load_dotenv
+from add_log_color import LogColor
 import requests
+import psutil
+import time
 
 load_dotenv()
 # config here
@@ -19,7 +23,7 @@ target_gem = TARGET_GEM  # gem type
 WALLET_ADDRESS = str(os.getenv('WALLET_ADDRESS_ELUP', ''))
 PRIVATE_KEY = str(os.getenv('PRIVATE_KEY_ELUP', ''))
 # your target diff level, will submit result to the pool if salt reach target quality. note that submit salt will cost gas.
-difficulty = 500000
+difficulty = 100000000
 
 pool_addr = "0x7558cF0c0Dfc21b30D5012586492aEA49fE1c27d"  # pool address
 pool_abi = '[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"uint256","name":"kind","type":"uint256"},{"internalType":"address","name":"wrapAddress","type":"address"},{"internalType":"string","name":"HPName","type":"string"},{"internalType":"string","name":"HPSymbol","type":"string"},{"internalType":"uint256","name":"bonus","type":"uint256"}],"name":"addGem","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"kind","type":"uint256"}],"name":"gems","outputs":[{"internalType":"string","name":"","type":"string"},{"internalType":"string","name":"","type":"string"},{"internalType":"bytes32","name":"","type":"bytes32"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"gemsMap","outputs":[{"internalType":"bool","name":"exist","type":"bool"},{"internalType":"uint256","name":"kind","type":"uint256"},{"internalType":"address","name":"wrapAddress","type":"address"},{"internalType":"contract HPToken","name":"hptoken","type":"address"},{"internalType":"uint256","name":"bonus","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"kind","type":"uint256"},{"internalType":"uint256","name":"salt","type":"uint256"}],"name":"mine","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"notInUse","type":"address"}],"name":"nonce","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"internalType":"uint256[]","name":"values","type":"uint256[]"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155BatchReceived","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"address","name":"from","type":"address"},{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"onERC1155Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"kind","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]'
@@ -29,9 +33,6 @@ pool_contract = w3.eth.contract(address=pool_addr, abi=pool_abi)
 NOTIFY_AUTH_TOKEN = os.getenv('NOTIFY_AUTH_TOKEN', '')
 notify_url = 'https://notify-api.line.me/api/notify'
 notify_headers = {'Authorization': 'Bearer ' + NOTIFY_AUTH_TOKEN}
-
-print('Pool address ', pool_addr)
-print('Gem', TARGET_GEM)
 
 # glhf - no need to change
 gem_addr = "0x342EbF0A5ceC4404CcFF73a40f9c30288Fc72611"  # fantom gem
@@ -43,50 +44,83 @@ name, color, entropy, _, gemsPerMine, multiplier, crafter, manager, pendingManag
 nonce = gem_contract.functions.nonce(pool_addr).call()
 
 chain_id = 250  # ftm
+coreNumber = 10
 
-if NOTIFY_AUTH_TOKEN != '':
-    body = {
-        'message': '🌊Gem mining in a Pool...'
-                   + '\nkind: ' + str(target_gem)
-                   + '\nwallet: ' + pool_addr
-                   + '\nnonce: ' + str(nonce)
-                   + '\ndifficulty: ' + str(difficulty)
-    }
+def mine(coreNumber, saltQueue, itrQueue):
+    # diff_result = not_classy_stick.BasicDiffCallback(gem_contract, TARGET_GEM)
+    nonce_result = not_classy_stick.BasicNonceCallback(contract=gem_contract, address=pool_addr)
+    stick = not_classy_stick.StickTheMiner(chain_id, entropy, gem_addr,
+                            pool_addr, target_gem, nonce, difficulty,
+                            nonce_callback=nonce_result)
+    stick.run(coreNumber, saltQueue, itrQueue)
 
-    res = requests.post(notify_url, data=body, headers=notify_headers)
-    print("Start result notified:", res.text)
-i = 0
-while True:
-    # Start mining
-    stick = StickTheMiner(chain_id, entropy, gem_addr,
-                          pool_addr, target_gem, nonce, difficulty,
-                          nonce_callback=BasicNonceCallback(contract=gem_contract, address=pool_addr))
-    salt = stick.run()
+
+if __name__ == '__main__':
+
+    loggerOBJ = LogColor()
+    logger = loggerOBJ.setup_logger()
 
     if NOTIFY_AUTH_TOKEN != '':
         body = {
-            'message': 'Gem found'
-                       + '\nkind: ' + str(target_gem)
-                       + '\nwallet: ' + pool_addr
-                       + '\nnonce: ' + str(nonce)
-                       + '\ndifficulty: ' + str(difficulty)
-                       + '\nsalt: ' + str(salt)
+            'message': '🌊Gem pool mining👷🏼‍♂️👷🏼‍♀️⛏...'
+                    + '\nkind: ' + str(target_gem)
+                    + '\nwallet: ' + pool_addr
+                    + '\nnonce: ' + str(nonce)
+                    + '\ndifficulty: ' + str(difficulty)
         }
-        res = requests.post(notify_url, data=body, headers=notify_headers)
-        print("End result notified:", res.text)
 
-    print("submiting tx")
-    # private_key = ""  # use at your own risk
-    gas = w3.eth.gasPrice  # pick a number
-    transaction = pool_contract.functions.mine(target_gem, salt).buildTransaction({
-        'from': WALLET_ADDRESS,
-        'gasPrice': gas,
-        "gas": 300000,
-        'nonce': w3.eth.get_transaction_count(WALLET_ADDRESS),
-    })
-    signed_tx = w3.eth.account.sign_transaction(transaction, PRIVATE_KEY)
-    ticket = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    print(w3.eth.wait_for_transaction_receipt(ticket))
-    i += 1
-    print("done - ", i, " times")
+        res = requests.post(notify_url, data=body, headers=notify_headers)
+        print("Start result notified:", res.text)
     
+    print('Pool address ', pool_addr)
+    print('Gem', TARGET_GEM)
+
+    mining_itr = 0
+    while True:
+        # Start mining
+        st = time.time()
+        processes = []
+        saltQueue = multiprocessing.Queue()
+        itrQueue = multiprocessing.Queue()
+        itrQueue.put(0)
+
+        for i in range(coreNumber):
+            p = multiprocessing.Process(target=mine, args=(i,saltQueue,itrQueue))
+            core = psutil.Process(os.getpid())
+            core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+            processes.append(p)
+            p.start()
+        
+        for process in processes:
+            process.join()
+
+        salt = saltQueue.get()
+        
+        if NOTIFY_AUTH_TOKEN != '':
+            body = {
+                'message': '💎Iteration ' + str(mining_itr+1) + ' finished....'
+                        + '\nkind: ' + str(target_gem)
+                        + '\nwallet: ' + pool_addr
+                        + '\nnonce: ' + str(nonce)
+                        + '\ntime spent this itr: ' + str("{:.2f}".format((time.time() - st) / 60)) + ' mins'
+                        + '\ndifficulty: ' + str(difficulty)
+                        + '\nsalt: ' + str(salt)
+            }
+            res = requests.post(notify_url, data=body, headers=notify_headers)
+            print("End result notified:", res.text)
+
+        print("📤Submitting tx...")
+        # private_key = ""  # use at your own risk
+        gas = w3.eth.gasPrice  # pick a number
+        transaction = pool_contract.functions.mine(target_gem, salt).buildTransaction({
+            'from': WALLET_ADDRESS,
+            'gasPrice': gas,
+            "gas": 300000,
+            'nonce': w3.eth.get_transaction_count(WALLET_ADDRESS),
+        })
+        signed_tx = w3.eth.account.sign_transaction(transaction, PRIVATE_KEY)
+        ticket = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        print(w3.eth.wait_for_transaction_receipt(ticket))
+        mining_itr += 1
+        print("💎done - ", mining_itr, " times!")
+        
