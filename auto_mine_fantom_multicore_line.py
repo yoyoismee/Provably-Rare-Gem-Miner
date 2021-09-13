@@ -11,6 +11,7 @@ import classy_stick
 import os
 from dotenv import load_dotenv
 import requests
+from add_log_color import LogColor
 
 load_dotenv()
 
@@ -46,6 +47,7 @@ chain_id = 250  # fantom
 # gem_contract_dict = {}
 coreNumber = 14
 
+    
 # for x in range (10):
 #     gem_contract_dict["gem_contract_{num}".format(num=x)] = w3.eth.contract(address=gem_addr, abi=gem_abi )
 # Start mining
@@ -61,10 +63,12 @@ def mine(coreNumber,saltQueue,itrQueue):
     stick.run(coreNumber,saltQueue,itrQueue)
 
 if __name__ == '__main__':
+    loggerOBJ = LogColor()
+    logger = loggerOBJ.setup_logger()
 
     if NOTIFY_AUTH_TOKEN != '':
         body = {
-            'message': 'Starting gem mining...'
+            'message': '👷🏼‍♂️⛏Starting gem mining...'
                     + '\nkind: ' + str(target_gem)
                     + '\nwallet: ' + your_address
                     + '\nnonce: ' + str(nonce)
@@ -73,11 +77,12 @@ if __name__ == '__main__':
 
         res = requests.post(notify_url, data=body, headers=notify_headers)
         print("Start result notified:", res.text)
+
     diff_value = classy_stick.BasicDiffCallback(gem_contract, target_gem).get_diff()
     nonce_value = classy_stick.BasicNonceCallback(gem_contract, your_address).get_nonce()
-    print('diff - ', diff_value)
-    print('nonce - ', nonce_value)
-
+    logger.log(loggerOBJ.get_diff(), str(diff_value))
+    logger.log(loggerOBJ.get_nonce(), str(nonce_value))
+   
     processes = []
     saltQueue = multiprocessing.Queue()
     itrQueue = multiprocessing.Queue()
@@ -95,7 +100,7 @@ if __name__ == '__main__':
 
     if NOTIFY_AUTH_TOKEN != '':
         body = {
-            'message': 'Gem found'
+            'message': '💎Gem found'
                     + '\nkind: ' + str(target_gem)
                     + '\nwallet: ' + your_address
                     + '\nnonce: ' + str(nonce)

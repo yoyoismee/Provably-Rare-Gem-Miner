@@ -7,6 +7,7 @@ from eth_abi.packed import encode_abi_packed
 import random
 import time
 from datetime import datetime, timedelta
+from add_log_color import LogColor
 
 class BasicDiffCallback:
     def __init__(self, contract, gem):
@@ -56,6 +57,8 @@ class StickTheMiner:
         return random.randint(1, 2 ** 256)
     
     def run(self, processNumber, saltQueue, itrQueue):
+        loggerOBJ = LogColor()
+        logger = loggerOBJ.setup_logger()
         i = 0
         st = time.time()
         if self.nonce_callback is not None:
@@ -69,8 +72,8 @@ class StickTheMiner:
             if ix < self.target:
                 template = "done! here's the salt - " + str(salt) + "\n"
                 template += f'Elapsed: {str(timedelta(seconds=(time.time() - st)))}\n' + f'found on: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}'
-
-                print(template)
+                logger.log(loggerOBJ.get_result(), "done! here's the salt")
+                logger.log(loggerOBJ.get_salt(),str(salt))
                 if self.line_notify is not None:
                     self.line_notify.send(template)
                 saltQueue.put(salt)
