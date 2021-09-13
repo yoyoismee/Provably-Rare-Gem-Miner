@@ -16,7 +16,7 @@ TARGET_GEM = int(os.getenv('TARGET_GEM', 1))  # change gem here or in .env
 
 w3 = Web3(Web3.HTTPProvider('https://rpc.ftm.tools'))
 target_gem = TARGET_GEM  # gem type
-your_address = "0x6647a7858a0B3846AbD5511e7b797Fc0a0c63a4b"
+your_address = os.getenv('WALLET_ADDRESS', 'DEFAULT_WALLET')
 # your target diff level, will submit result to the pool if salt reach target quality. note that submit salt will cost gas.
 difficulty = 5000000
 
