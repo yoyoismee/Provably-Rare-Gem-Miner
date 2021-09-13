@@ -74,16 +74,18 @@ while True:
         res = requests.post(notify_url, data=body, headers=notify_headers)
         print("End result notified:", res.text)
 
-    print("submiting tx")
-    private_key = os.getenv('PRIVATE_KEY', '')  # use at your own risk
-    gas = w3.eth.gasPrice  # pick a number
-    transaction = pool_contract.functions.mine(target_gem, salt).buildTransaction({
-        'from': your_address,
-        'gasPrice': gas,
-        "gas": 300000,
-        'nonce': w3.eth.get_transaction_count(your_address),
-    })
-    signed_tx = w3.eth.account.sign_transaction(transaction, private_key)
-    ticket = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    print(w3.eth.wait_for_transaction_receipt(ticket))
-    print("done")
+    
+    PRIVATE_KEY = os.getenv('PRIVATE_KEY', '')  # use at your own risk
+    if PRIVATE_KEY != '':
+        print("submiting tx")
+        gas = w3.eth.gasPrice  # pick a number
+        transaction = pool_contract.functions.mine(target_gem, salt).buildTransaction({
+            'from': your_address,
+            'gasPrice': gas,
+            "gas": 300000,
+            'nonce': w3.eth.get_transaction_count(your_address),
+        })
+        signed_tx = w3.eth.account.sign_transaction(transaction, PRIVATE_KEY)
+        ticket = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        print(w3.eth.wait_for_transaction_receipt(ticket))
+        print("done")
