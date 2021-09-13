@@ -2,7 +2,7 @@
 # love ya alpha team. <3
 # by yoyoismee.eth
 # use at your own risk
-# only work with eth for now
+# only work with fantom for now
 
 from web3 import Web3
 from classy_stick import StickTheMiner, BasicDiffCallback, BasicNonceCallback
