@@ -10,6 +10,7 @@ import not_classy_stick
 import os
 from dotenv import load_dotenv
 from add_log_color import LogColor
+from sys import platform
 import requests
 import psutil
 import time
@@ -99,7 +100,10 @@ if __name__ == '__main__':
         for i in range(coreNumber):
             p = multiprocessing.Process(target=mine, args=(i,saltQueue,itrQueue))
             core = psutil.Process(os.getpid())
-            core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+            if(platform=="win32"):
+                core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+            elif(platform=="darwin"):
+                core.nice(10)
             processes.append(p)
             p.start()
         
