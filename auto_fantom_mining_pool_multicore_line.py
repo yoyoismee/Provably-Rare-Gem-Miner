@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     if NOTIFY_AUTH_TOKEN != '':
         body = {
-            'message': '🌊PC Gem pool mining👷🏼‍♂️👷🏼‍♀️⛏...'
+            'message': '🌊Gem pool mining👷🏼‍♂️👷🏼‍♀️⛏...'
                     + '\nkind: ' + str(target_gem)
                     + '\nwallet: ' + pool_addr
                     + '\nnonce: ' + str(nonce)
@@ -85,10 +85,10 @@ if __name__ == '__main__':
     def terminate_program():
         if NOTIFY_AUTH_TOKEN != '':
             body = {
-                'message': '❌PC Gem pool mining is closed....❌'
+                'message': '❌Gem pool mining is closed....❌'
             }
             res = requests.post(notify_url, data=body, headers=notify_headers)
-            print("❌PC Gem pool mining is closed...❌", res.text)
+            print("❌Gem pool mining is closed...❌", res.text)
 
     while True:
         # Start mining
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         
         if NOTIFY_AUTH_TOKEN != '':
             body = {
-                'message': '💎PC Iteration ' + str(mining_itr+1) + ' finished....'
+                'message': '💎Iteration ' + str(mining_itr+1) + ' finished....'
                         + '\nkind: ' + str(target_gem)
                         + '\nwallet: ' + pool_addr
                         + '\nnonce: ' + str(nonce)

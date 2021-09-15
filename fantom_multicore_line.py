@@ -12,6 +12,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from add_log_color import LogColor
+import atexit
 
 load_dotenv()
 
@@ -66,6 +67,7 @@ if __name__ == '__main__':
     loggerOBJ = LogColor()
     logger = loggerOBJ.setup_logger()
 
+ 
     if NOTIFY_AUTH_TOKEN != '':
         body = {
             'message': '👷🏼‍♂️⛏Starting gem mining...'
@@ -109,6 +111,15 @@ if __name__ == '__main__':
         }
         res = requests.post(notify_url, data=body, headers=notify_headers)
         print("End result notified:", res.text)
+
+    @atexit.register
+    def terminate_program():
+        if NOTIFY_AUTH_TOKEN != '':
+            body = {
+                'message': '❌Gem pool mining is closed....❌'
+            } 
+            res = requests.post(notify_url, data=body, headers=notify_headers)
+            print("❌Gem pool mining is closed...❌", res.text)
 
     """
     private_key = "" # use at your own risk
