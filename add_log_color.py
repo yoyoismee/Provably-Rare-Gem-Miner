@@ -10,7 +10,6 @@ class LogColor:
         return self.NONCE_COLOR_LEVEL
     
     def get_diff(self):
-        print(self.DIFF_COLOR_LEVEL)
         return self.DIFF_COLOR_LEVEL
     
     def get_salt(self):

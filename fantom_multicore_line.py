@@ -6,13 +6,13 @@
 
 import multiprocessing
 import psutil
-from web3 import Web3
 import not_classy_stick
 import os
-from dotenv import load_dotenv
 import requests
-from add_log_color import LogColor
 import atexit
+from web3 import Web3
+from dotenv import load_dotenv
+from add_log_color import LogColor
 from sys import platform
 
 load_dotenv()

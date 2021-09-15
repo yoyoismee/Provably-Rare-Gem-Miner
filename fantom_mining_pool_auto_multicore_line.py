@@ -5,16 +5,16 @@
 # only work with eth for now
 
 import multiprocessing
-from web3 import Web3
 import not_classy_stick
 import os
-from dotenv import load_dotenv
-from add_log_color import LogColor
-from sys import platform
 import requests
 import psutil
 import time
 import atexit
+from dotenv import load_dotenv
+from add_log_color import LogColor
+from sys import platform
+from web3 import Web3
 
 load_dotenv()
 # config here
