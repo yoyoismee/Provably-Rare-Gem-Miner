@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import requests
 from add_log_color import LogColor
 import atexit
+from sys import platform
 
 load_dotenv()
 
@@ -93,7 +94,12 @@ if __name__ == '__main__':
     for i in range(coreNumber):
         p = multiprocessing.Process(target=mine,args=(i,saltQueue,itrQueue))
         core = psutil.Process(os.getpid())
-        core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+
+        #decreased the priority of the process to reduced computer lags
+        if(platform=="win32"):
+            core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+        elif(platform=="darwin"):
+            core.nice(10)
         processes.append(p)
         p.start()
 
