@@ -22,8 +22,8 @@ TARGET_GEM = int(os.getenv('TARGET_GEM', 1))  # change gem here or in .env
 
 w3 = Web3(Web3.HTTPProvider('https://rpc.ftm.tools'))
 target_gem = TARGET_GEM  # gem type
-WALLET_ADDRESS = str(os.getenv('WALLET_ADDRESS_ELUP', ''))
-PRIVATE_KEY = str(os.getenv('PRIVATE_KEY_ELUP', ''))
+WALLET_ADDRESS = str(os.getenv('WALLET_ADDRESS', ''))
+PRIVATE_KEY = str(os.getenv('PRIVATE_KEY', ''))
 # your target diff level, will submit result to the pool if salt reach target quality. note that submit salt will cost gas.
 difficulty = 50000000
 
@@ -46,7 +46,8 @@ name, color, entropy, _, gemsPerMine, multiplier, crafter, manager, pendingManag
 nonce = gem_contract.functions.nonce(pool_addr).call()
 
 chain_id = 250  # ftm
-coreNumber = 10
+#number of core for processing, the higher the faster, but shouldn't exceed ˜16 cores 
+coreNumber = 8
 
 def mine(coreNumber, saltQueue, itrQueue):
     # diff_result = not_classy_stick.BasicDiffCallback(gem_contract, TARGET_GEM)
@@ -56,10 +57,9 @@ def mine(coreNumber, saltQueue, itrQueue):
                             nonce_callback=nonce_result)
     stick.run(coreNumber, saltQueue, itrQueue)
 
-
-
 if __name__ == '__main__':
 
+    #setting up logger for colored output
     loggerOBJ = LogColor()
     logger = loggerOBJ.setup_logger()
 
@@ -80,6 +80,7 @@ if __name__ == '__main__':
 
     mining_itr = 0
 
+    #send Line noti when exiting the program
     @atexit.register
     def terminate_program():
         if NOTIFY_AUTH_TOKEN != '':
@@ -100,6 +101,8 @@ if __name__ == '__main__':
         for i in range(coreNumber):
             p = multiprocessing.Process(target=mine, args=(i,saltQueue,itrQueue))
             core = psutil.Process(os.getpid())
+
+            #decreased the priority of the process to reduced computer lags
             if(platform=="win32"):
                 core.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
             elif(platform=="darwin"):
@@ -126,7 +129,6 @@ if __name__ == '__main__':
             print("End result notified:", res.text)
 
         print("📤Submitting tx...")
-        # private_key = ""  # use at your own risk
         gas = w3.eth.gasPrice  # pick a number
         transaction = pool_contract.functions.mine(target_gem, salt).buildTransaction({
             'from': WALLET_ADDRESS,
@@ -134,6 +136,7 @@ if __name__ == '__main__':
             "gas": 300000,
             'nonce': w3.eth.get_transaction_count(WALLET_ADDRESS),
         })
+        # private_key, use at your own risk
         signed_tx = w3.eth.account.sign_transaction(transaction, PRIVATE_KEY)
         ticket = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
         print(w3.eth.wait_for_transaction_receipt(ticket))

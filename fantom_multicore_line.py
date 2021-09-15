@@ -45,7 +45,7 @@ nonce = gem_contract.functions.nonce(your_address).call()
 chain_id = 250  # fantom
 
 # gem_contract_dict = {}
-coreNumber = 14
+coreNumber = 8
 
     
 # for x in range (10):
